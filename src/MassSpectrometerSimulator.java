@@ -1,6 +1,7 @@
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -14,8 +15,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
-import java.awt.geom.Line2D;
 
 public class MassSpectrometerSimulator extends Application {
 
@@ -50,12 +49,12 @@ public class MassSpectrometerSimulator extends Application {
         magneticFieldASlider.setMajorTickUnit(0.5);
         magneticFieldASlider.setMinorTickCount(1);
         magneticFieldASlider.setBlockIncrement(0.1);
-        Slider magneticFieldBSlider = new Slider( -0.27, 0.27, 0.1);
+        Slider magneticFieldBSlider = new Slider( -1.5, 1.5, 1);
         magneticFieldBSlider.setShowTickLabels(true);
         magneticFieldBSlider.setShowTickMarks(true);
-        magneticFieldBSlider.setMajorTickUnit(0.05);
-        magneticFieldBSlider.setMinorTickCount(5);
-        magneticFieldBSlider.setBlockIncrement(0.01);
+        magneticFieldBSlider.setMajorTickUnit(0.5);
+        magneticFieldBSlider.setMinorTickCount(1);
+        magneticFieldBSlider.setBlockIncrement(0.1);
         Slider initialVelocitySlider = new Slider(2, 5, 3);
         initialVelocitySlider.setShowTickLabels(true);
         initialVelocitySlider.setShowTickMarks(true);
@@ -108,20 +107,27 @@ public class MassSpectrometerSimulator extends Application {
 
 
         // Layout for equations
-        VBox equationsBox = new VBox(10);
+        VBox equationsBox = new VBox(20);
+        equationsBox.setScaleX(1.12);
+        equationsBox.setScaleY(1.12);
+        equationsBox.setTranslateX(20);
+        equationsBox.setTranslateY(40);
+        equationsBox.setSpacing(10);
         equationsBox.getChildren().addAll(
-                new Label("Ecuaciones:"),
-                new Label("FbA = q * v * bA"),
-                new Label("Fe = q * E"),
-                new Label("FbB = q * v * bB"),
-                new Label("r = (m * v) / (|q| * bB)")
+                new Label("--[  Ecuaciones: ]-- "),
+                new Label("FE = q • E"),
+                new Label("FB = q • v • B"),
+                new Label("FB´ = q • v • B´"),
+                new Label("r = (m • v) ∕ (|q| • B´)")
         );
+
         // Main layout
         BorderPane root = new BorderPane();
         root.setLeft(equationsBox);
         root.setRight(slidersGrid);
         root.setBottom(buttonsBox);
         root.setCenter(simulationPane);
+
 
         // Set the scene
         Scene scene = new Scene(root, 800, 600); //antes 800x600
@@ -189,55 +195,80 @@ public class MassSpectrometerSimulator extends Application {
 
     private void drawMassSpectrometerDiagram(){
         // Draw the selector of velocity region
-        Line leftBoundary = new Line(200, 50, 200, 300);
-        Line rightBoundary = new Line(300, 50, 300, 300);
 
-        leftBoundary.setStrokeWidth(2);
-        rightBoundary.setStrokeWidth(2);
+
 
         // Draw the region with only magnetic field B'
         Line topBoundary = new Line(100, 500, 400, 500);
-        Line bottomBoundaryLeft = new Line(100, 300, 243, 300);
-        Line bottomBoundaryRight = new Line(256, 300, 400, 300);
-        Line leftRegion2 = new Line(100, 300, 100, 500);
-        Line rightRegion2 = new Line(400, 300, 400, 500);
-        Line gapLeft = new Line(243, 300, 243, 305);
-        Line gapRight = new Line(256, 300, 256, 305);
+        Line bottomBoundaryLeft = new Line(50, 300, 240, 300);
+        Line bottomBoundaryRight = new Line(259, 300, 450, 300);
+
+        Line gapLeft = new Line(241, 300, 241, 305);
+        Line gapRight = new Line(258, 300, 258, 305);
 
         topBoundary.setStrokeWidth(2);
-        bottomBoundaryLeft.setStrokeWidth(2);
-        bottomBoundaryRight.setStrokeWidth(2);
-        leftRegion2.setStrokeWidth(2);
-        rightRegion2.setStrokeWidth(2);
-        gapLeft.setStrokeWidth(2);
-        gapRight.setStrokeWidth(2);
+        bottomBoundaryLeft.setStrokeWidth(5);
+        bottomBoundaryRight.setStrokeWidth(5);
+        bottomBoundaryRight.setStroke(Color.GRAY);
+        bottomBoundaryLeft.setStroke(Color.GRAY);
+        gapLeft.setStrokeWidth(3);
+        gapRight.setStrokeWidth(3);
+        gapRight.setStroke(Color.GRAY);
+        gapLeft.setStroke(Color.GRAY);
 
-        simulationPane.getChildren().addAll(leftBoundary, rightBoundary, topBoundary, bottomBoundaryLeft, bottomBoundaryRight, leftRegion2, rightRegion2,gapLeft,gapRight);
+        Rectangle b = new Rectangle(50, 300, 400, 200);
+        b.setStroke(Color.GRAY);
+        b.setFill(Color.rgb(245,245,120, 0.2));
+
+
+        simulationPane.getChildren().addAll( b, bottomBoundaryLeft, bottomBoundaryRight,gapLeft,gapRight);
         drawAxes();
     }
 
     private void drawMassSpectrometer(double electricField, double magneticFieldA, double magneticFieldB) {
 
         if (electricField > 0) {
-            for (int y = 60; y < 300; y += 35) {
+            Rectangle leftBoundary = new Rectangle(193, 50, 7, 250);
+            leftBoundary.setStroke(Color.BLUE);
+            leftBoundary.setFill(Color.CADETBLUE);
+
+            Rectangle rightBoundary = new Rectangle(300, 50, 7, 250);
+            rightBoundary.setStroke(Color.RED);
+            rightBoundary.setFill(Color.DARKORANGE);
+
+            simulationPane.getChildren().addAll(leftBoundary, rightBoundary);
+            for (int y = 60; y < 300; y += 40) {
                 double arrowLength = electricField  * 40;  // Scale the arrow length
                 Line arrow = new Line(240 - arrowLength / 2, y, 260 + arrowLength / 2, y);
                 Line arrowHead1 = new Line(240 - arrowLength / 2 + 10, y - 5, 240 - arrowLength / 2, y);
                 Line arrowHead2 = new Line(240 - arrowLength / 2 + 10, y + 5, 240 - arrowLength / 2, y);
 
-                arrow.setStroke(Color.BLUE);
-                arrowHead1.setStroke(Color.BLUE);
-                arrowHead2.setStroke(Color.BLUE);
-                simulationPane.getChildren().addAll(arrow, arrowHead1, arrowHead2);
+                arrow.setStroke(Color.DARKORANGE);
+                arrowHead1.setStroke(Color.DARKORANGE);
+                arrowHead2.setStroke(Color.DARKORANGE);
+                arrow.setStrokeWidth(2);
+                arrow.setOpacity(10);
+                arrowHead1.setStrokeWidth(2);
+                arrowHead1.setOpacity(10);
+                arrowHead2.setStrokeWidth(2);
+                arrowHead2.setOpacity(10);
+                simulationPane.getChildren().addAll( arrow, arrowHead1, arrowHead2);
             }
+
+        } else {
+            Rectangle leftBoundary = new Rectangle(193, 50, 5, 250);
+
+            Rectangle rightBoundary = new Rectangle(300, 50, 5, 250);
+
+            simulationPane.getChildren().addAll(leftBoundary, rightBoundary);
         }
 
         // Draw magnetic field crosses or points
         if (magneticFieldA != 0) {
             for (int y = 60; y < 300; y += 30) {
-                for (int x = 220; x < 310; x += 30) {
+                for (int x = 175; x < 355; x += 30) {
                     if (magneticFieldA > 0) {
-                        double crossSize = magneticFieldA * 15;  // Scale the cross size
+                        double crossSize = magneticFieldA * 10;  // Scale the cross size
                         Line line1 = new Line(x - crossSize / 2, y - crossSize / 2, x + crossSize / 2, y + crossSize / 2);
                         Line line2 = new Line(x - crossSize / 2, y + crossSize / 2, x + crossSize / 2, y - crossSize / 2);
                         line1.setStroke(Color.GREEN);
@@ -245,24 +276,27 @@ public class MassSpectrometerSimulator extends Application {
                         simulationPane.getChildren().addAll(line1, line2);
                     } else {
                         double pointRadius = -magneticFieldA * 5;  // Scale the point radius
-                        Circle point = new Circle(x, y, pointRadius, Color.BLACK);
+                        Circle point = new Circle(x, y, pointRadius, Color.GREEN);
                         simulationPane.getChildren().add(point);
                     }
                 }
             }
         }
-
         if (magneticFieldB != 0) {
-            for (int y = 310; y < 500; y += 15) {
-                for (int x = 108; x < 400; x += 15) {
+            for (int y = 312; y < 500; y += 30) {
+                for (int x = 70; x < 450; x += 30) {
                     if (magneticFieldB > 0) {
-                        double crossSize = magneticFieldB * 40;  // Scale the cross size
+                        double crossSize = magneticFieldB * 10;  // Scale the cross size
                         Line line1 = new Line(x - crossSize / 2, y - crossSize / 2, x + crossSize / 2, y + crossSize / 2);
                         Line line2 = new Line(x - crossSize / 2, y + crossSize / 2, x + crossSize / 2, y - crossSize / 2);
+                        line1.setStroke(Color.GREEN);
+                        line2.setStroke(Color.GREEN);
+                        line2.setStrokeWidth(1.3);
+                        line1.setStrokeWidth(1.3);
                         simulationPane.getChildren().addAll(line1, line2);
                     } else {
                         double pointRadius = -magneticFieldB * 5;  // Scale the point radius
-                        Circle point = new Circle(x, y, pointRadius, Color.BLACK);
+                        Circle point = new Circle(x, y, pointRadius, Color.GREEN);
                         simulationPane.getChildren().add(point);
                     }
                 }
@@ -276,22 +310,33 @@ public class MassSpectrometerSimulator extends Application {
     private void drawAxes() {
         // Eje X
         Line ejeX = new Line(50, 50, 110, 50);
-        Line flechaX1 = new Line(110, 50, 100, 60);
-        Line flechaX2 = new Line(110, 50, 100, 40);
-        Line cruzX1 = new Line( 120 - 5,  50 - 5,  120 + 5,  50 + 5);
-        Line cruzX2 = new Line(120 + 5, 50 - 5, 120 - 5, 50 + 5);
+        Line flechaX1 = new Line(110, 50, 105, 55);
+        Line flechaX2 = new Line(110, 50, 105, 45);
+
+        Line cruzX1 = new Line( 120 - 2.5,  50 - 2.5,  120 + 2.5,  50 + 2.5);
+        Line cruzX2 = new Line(120 + 2.5, 50 - 2.5, 120 - 2.5, 50 + 2.5);
 
         simulationPane.getChildren().addAll(ejeX, flechaX1, flechaX2, cruzX1, cruzX2);
 
         // Eje Y
         Line ejeY = new Line(50, 110, 50, 50);
-        Line flechaY1 = new Line(50, 110, 40, 100);
-        Line flechaY2 = new Line(50, 110, 60, 100);
+        Line flechaY1 = new Line(50, 110, 45, 105);
+        Line flechaY2 = new Line(50, 110, 55, 105);
 
-        Line letraYIzq = new Line(50, 120, 45, 115);
-        Line letraYDer = new Line(50, 120, 55, 115);
-        Line LetraEjeY = new Line(50, 120, 50, 127);
-        simulationPane.getChildren().addAll(ejeY, flechaY1, flechaY2, letraYIzq, letraYDer, LetraEjeY);
+        Line letraYIzq = new Line( 50 - 2.5,  120 - 2.5,  50,  120);
+        Line letraYDer = new Line(50 + 2.5, 120 - 2.5, 50 - 2.5, 120 + 2.5);
+
+        letraYIzq.setStrokeWidth(1.5);
+        letraYDer.setStrokeWidth(1.5);
+
+
+//        Line letraYIzq = new Line( 110 - 2.5,  50 - 2.5,  110 + 2.5,  50 + 2.5);
+//        Line letraYDer = new Line(110 + 2.5, 50 - 2.5, 59.5, 115);
+//        Line cruzX2 = new Line(120 + 2.5, 50 - 2.5, 120 - 2.5, 50 + 2.5);
+//
+//        Line letraYIzq = new Line(50, 117.5, 47.5, 115);
+//        Line letraYDer = new Line(50, 117.5, 59.5, 115);
+        simulationPane.getChildren().addAll(ejeY, flechaY1, flechaY2, letraYIzq, letraYDer);
     }
     private void simulateParticleMotion(double electricField, double magneticFieldA, double magneticFieldB, double initialVelocity) {
         // Clear the previous simulation
@@ -317,12 +362,15 @@ public class MassSpectrometerSimulator extends Application {
         //Vector fuerza electrica a particula
         if (electricField >0) {
             vectorFuerzaElectrica = new Line(particle.getCenterX(), particle.getCenterY(), particle.getCenterX() - (electricField * 25), particle.getCenterY());
-            vectorFuerzaElectrica.setStroke(Color.BLUE);
+            vectorFuerzaElectrica.setStroke(Color.ORANGERED);
+            vectorFuerzaElectrica.setStrokeWidth(2);
 
             vectorFuerzaElectricaFlechaUno = new Line(5 + (particle.getCenterX() - (electricField * 25)), particle.getCenterY() + 5, (particle.getCenterX() - (electricField * 25)), particle.getCenterY());
             vectorFuerzaElectricaFlechaDos = new Line(5 + (particle.getCenterX() - (electricField * 25)), particle.getCenterY() - 5, (particle.getCenterX() - (electricField * 25)), particle.getCenterY());
-            vectorFuerzaElectricaFlechaDos.setStroke(Color.BLUE);
-            vectorFuerzaElectricaFlechaUno.setStroke(Color.BLUE);
+            vectorFuerzaElectricaFlechaDos.setStroke(Color.ORANGERED);
+            vectorFuerzaElectricaFlechaUno.setStroke(Color.ORANGERED);
+            vectorFuerzaElectricaFlechaDos.setStrokeWidth(2);
+            vectorFuerzaElectricaFlechaUno.setStrokeWidth(2);
 
             simulationPane.getChildren().addAll(vectorFuerzaElectrica, vectorFuerzaElectricaFlechaUno, vectorFuerzaElectricaFlechaDos);
         }
@@ -331,11 +379,14 @@ public class MassSpectrometerSimulator extends Application {
         if (magneticFieldA !=0) {
             vectorFuerzaMagnetica = new Line(particle.getCenterX(), particle.getCenterY(), particle.getCenterX() + (magneticFieldA * initialVelocity * 25), particle.getCenterY());
             vectorFuerzaMagnetica.setStroke(Color.GREEN);
+            vectorFuerzaMagnetica.setStrokeWidth(2);
             if (magneticFieldA > 0) {
                 vectorFuerzaMagneticaFlechaUno = new Line(5+ (particle.getCenterX() + (magneticFieldA * initialVelocity * 25)), particle.getCenterY(), (particle.getCenterX() + (magneticFieldA * initialVelocity * 25)), particle.getCenterY()+ 5);
                 vectorFuerzaMagneticaFlechaDos = new Line((5+ particle.getCenterX() + (magneticFieldA * initialVelocity * 25)), particle.getCenterY(),  (particle.getCenterX() + (magneticFieldA * initialVelocity * 25)), particle.getCenterY()-5);
                 vectorFuerzaMagneticaFlechaUno.setStroke(Color.GREEN);
                 vectorFuerzaMagneticaFlechaDos.setStroke(Color.GREEN);
+                vectorFuerzaMagneticaFlechaUno.setStrokeWidth(2);
+                vectorFuerzaMagneticaFlechaDos.setStrokeWidth(2);
 
                 simulationPane.getChildren().addAll(vectorFuerzaMagnetica, vectorFuerzaMagneticaFlechaUno, vectorFuerzaMagneticaFlechaDos);
             }
@@ -350,7 +401,7 @@ public class MassSpectrometerSimulator extends Application {
         }
         // Constants
         double charge = 1.0;  // Charge of the particle
-        double mass = 1.0;    // Mass of the particle
+        double mass = 20.0;    // Mass of the particle
 
         // Compute the velocity in the x direction from the electric field and the initial velocity
         double[] velocityX = {0};
@@ -427,7 +478,7 @@ public class MassSpectrometerSimulator extends Application {
             }
 
             // In region 2 (only magnetic field B')
-            if (newY >= 300 && newY <= 500 && newX >= 100 && newX <= 400) {
+            if (newY >= 300 && newY <= 500 && newX >= 50 && newX <= 450) {
                 regionUno[0] = false;
                 vectorFuerzaElectrica.setVisible(false);
                 vectorFuerzaElectricaFlechaDos.setVisible(false);
@@ -448,12 +499,12 @@ public class MassSpectrometerSimulator extends Application {
                     vectorFuerzaMagnetica.setStartY(particle.getCenterY());
                     vectorFuerzaMagnetica.setStartX(particle.getCenterX());
 
-                    double posFinalX = particle.getCenterX() + (vectorFuerzaMagneticaV.getX() * 70);
-                    double posFinalY = particle.getCenterY() + (vectorFuerzaMagneticaV.getY() * 70);
+                    double posFinalX = particle.getCenterX() + (vectorFuerzaMagneticaV.getX() * 25);
+                    double posFinalY = particle.getCenterY() + (vectorFuerzaMagneticaV.getY() * 25);
                     vectorFuerzaMagnetica.setEndY(posFinalY);
                     vectorFuerzaMagnetica.setEndX(posFinalX);
-                    }
                 }
+            }
 
 
             // Update the particle position
@@ -481,7 +532,7 @@ public class MassSpectrometerSimulator extends Application {
                     }
                 }
             }
-            else if (newX >= 400 || newY >= 500 || newY < 300 || newX <= 100){
+            else if (newX >= 450 || newY >= 500 || newY < 300 || newX <= 50){
                 System.out.println("Pare en REgion 2");
                 timeline.stop();
             }
