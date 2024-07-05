@@ -1,7 +1,7 @@
 public class Vector3D {
-    private double x;
-    private double y;
-    private double z;
+    private final double x;
+    private final double y;
+    private final double z;
 
     // Constructor
     public Vector3D(double x, double y, double z) {
@@ -35,15 +35,5 @@ public class Vector3D {
     @Override
     public String toString() {
         return "Vector3D(" + x + ", " + y + ", " + z + ")";
-    }
-
-    // Método principal para pruebas
-    public static void main(String[] args) {
-        Vector3D v1 = new Vector3D(1, 2, 3);
-        Vector3D v2 = new Vector3D(4, 5, 6);
-
-        Vector3D crossProduct = v1.crossProduct(v2);
-
-        System.out.println("El producto vectorial de " + v1 + " y " + v2 + " es " + crossProduct);
     }
 }
