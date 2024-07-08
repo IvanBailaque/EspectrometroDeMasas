@@ -1,8 +1,8 @@
-# Simulador Espectrometro de Masas.
+# Simulador Espectrómetro de Masas.
 
 ## Física II - Universidad Nacional Tres de Febrero.
 
-Simulador realizado para la materia Física II. El mismo consta de una simulación del funcionamiento de un espectrometro de masas. Realizado en Java utilizando la libreria Java FX
+Simulador realizado para la materia Física II. El mismo consta de una simulación del funcionamiento de un espectrómetro de masas. Realizado en Java utilizando la libreria Java FX
 
 El objetivo princiipal de este simulador, es que el usuario aprenda sobre las interacciones entre una particula cargada con velocidad, campos eléctricos y campos magnéticos.
 
