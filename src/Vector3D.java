@@ -11,7 +11,7 @@ public class Vector3D {
     }
 
     // Método para el producto vectorial
-    public Vector3D crossProduct(Vector3D other) {
+    public Vector3D productoVectorial(Vector3D other) {
         double crossX = this.y * other.z - this.z * other.y;
         double crossY = this.z * other.x - this.x * other.z;
         double crossZ = this.x * other.y - this.y * other.x;

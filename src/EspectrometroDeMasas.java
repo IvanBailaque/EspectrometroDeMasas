@@ -40,7 +40,7 @@ public class EspectrometroDeMasas extends Application {
         // Sliders para la entrada de parametros.
         Slider sliderCampoElectrico = new Slider(0, 2, 1.5);
         Slider sliderCampoMagneticoA = new Slider(-1, 1, 0.5);
-        Slider sliderCampoMagneticoB = new Slider( -2, 2, 1);
+        Slider sliderCampoMagneticoB = new Slider( -1, 1, 0.3);
         Slider sliderVelocidadInicial = new Slider(2, 5, 3);
 
         // Seteo de valores de configuracion para sliders.
@@ -147,7 +147,7 @@ public class EspectrometroDeMasas extends Application {
             if (nivel == 1){
                 sliderCampoMagneticoA.setDisable(false);
                 valorCampoMagneticoA.setDisable(false);
-                
+
                 valorCampoElectrico.setDisable(true);
                 valorCampoMagneticoB.setDisable(true);
                 valorVelocidadInicial.setDisable(true);
@@ -191,7 +191,7 @@ public class EspectrometroDeMasas extends Application {
 
                 sliderCampoElectrico.setDisable(false);
                 valorCampoElectrico.setDisable(false);
-                carga = 0.5;
+                carga = 7;
 
                 actualizarGrilla(etiquetaCampoElectrico, sliderCampoElectrico, valorCampoElectrico,
                         etiquetaCampoMagneticoA, sliderCampoMagneticoA, valorCampoMagneticoA,
@@ -250,7 +250,7 @@ public class EspectrometroDeMasas extends Application {
         grillaDeSliders.add(new Label("FBA = q • v • A = " + String.format("%.2f",Math.abs(carga * sliderVelocidadInicial.getValue()*sliderCampoMagneticoA.getValue())) + " N"   ), 1, 5);
         grillaDeSliders.add(new Label("FBB = q • v • B = " + String.format("%.2f",Math.abs(carga *sliderVelocidadInicial.getValue()*sliderCampoMagneticoB.getValue())) + " N"), 0, 6);
         double radio = Math.abs((masa * sliderVelocidadInicial.getValue())/(masa * sliderCampoMagneticoB.getValue()));
-        grillaDeSliders.add(new Label("r = (m • v) ∕ (|q| • B´) = " + String.format("%.2f",radio) + " cm = " + String.format("%.2f",radio*0.01)  + " m"), 1, 6);
+        grillaDeSliders.add(new Label("r = (m • v) ∕ (|q| • B) = " + String.format("%.2f",radio) + " cm = " + String.format("%.2f",radio*0.01)  + " m"), 1, 6);
         grillaDeSliders.add(new Label("Masa = 20 g = 0,02 Kg"), 2, 5);
         grillaDeSliders.add(new Label("Carga = " + carga + " C"), 2, 6);
 
@@ -301,7 +301,7 @@ public class EspectrometroDeMasas extends Application {
                                que la particula impacte en el
                                punto P --"""),
                     new Label("-- Velocidad inicial = 5 m/s --"),
-                    new Label("-- Carga = 0,5 C--"));
+                    new Label("-- Carga = 7 C--"));
         } else if (nivel == 4){
             titulosNiveles.getChildren().addAll(
                     new Label("--[  Espectrometro de masas: ]-- "),
@@ -390,12 +390,12 @@ public class EspectrometroDeMasas extends Application {
 
         // Dibujo de puntos degun el nivel.
         if (nivel == 2){
-            Circle puntoP = new Circle(343, 297, 5, Color.BLACK);
+            Circle puntoP = new Circle(338, 297, 5, Color.BLACK);
             Text letraP = new Text(340, 290, "P");
             panelDeSimulacion.getChildren().addAll(puntoP,letraP);
 
         } else if (nivel == 3){
-            Circle puntoP = new Circle(90, 297, 5, Color.BLACK);
+            Circle puntoP = new Circle(88, 297, 5, Color.BLACK);
             Text letraP = new Text(87, 290, "P");
             panelDeSimulacion.getChildren().addAll(puntoP, letraP);
 
@@ -561,7 +561,7 @@ public class EspectrometroDeMasas extends Application {
         Timeline lineaDeTiempo = new Timeline();
         lineaDeTiempo.setCycleCount(Timeline.INDEFINITE);
 
-        // Fotogramas clave
+        // Fotograma clave
         final boolean[] regionUno = {true};
         KeyFrame fotograma = new KeyFrame(Duration.millis(20), _ -> {
             // Actualizar la posicion de la particula segun la velocidad.
@@ -575,6 +575,8 @@ public class EspectrometroDeMasas extends Application {
             if (nuevoY > 40 && nuevoY < 300 && nuevoX > 200 && nuevoX < 300) {
                 double fuerzaElectrica = carga * campoElectrico;
                 double fuerzaMagnetica = carga * velocidadY[0] * campoMagneticoA;
+                // Ftot = m * a => a = Ftot / m
+                // Ftot = F.Lorentz = -qE + qVBSen(90)
                 double fuerzaNeta = fuerzaMagnetica - fuerzaElectrica;
                 double aceleracionEnX = fuerzaNeta / masa;
                 velocidadX[0] += aceleracionEnX * 0.5;
@@ -636,10 +638,15 @@ public class EspectrometroDeMasas extends Application {
                 puntaIzqVectorFuerzaMagnetica.setVisible(false);
                 puntaDerVectorFuerzaMagnetica.setVisible(false);
 
-                // Creo los vectores necesarios para realizar el producto vectorial FB = q.VxB
-                Vector3D vectorVelocidad3D = new Vector3D(velocidadX[0], velocidadY[0], 0);
+                // Creo los vectores necesarios para realizar el producto vectorial.
+
+                // Ftot = Fb = q (v x B) = (FbX, FbY, FbZ)
+                // FtotX = FbX, FtotY = FbY, FtotZ = FbZ
+                Vector3D vectorVelocidad3D = new Vector3D(carga * velocidadX[0], carga * velocidadY[0], 0);
                 Vector3D vectorCampoMagnetico3D = new Vector3D(0, 0, campoMagneticoB);
-                Vector3D vectorFuerzaMagnetica3D = vectorVelocidad3D.crossProduct(vectorCampoMagnetico3D);
+                Vector3D vectorFuerzaMagnetica3D = vectorVelocidad3D.productoVectorial(vectorCampoMagnetico3D);
+                // FbX = m * aX => aX = FbX / m
+                // FbY = m * aY => aY = FbY / m
 
                 double aceleracionY = vectorFuerzaMagnetica3D.getY() / masa;
                 double aceleracionX = vectorFuerzaMagnetica3D.getX() / masa;
